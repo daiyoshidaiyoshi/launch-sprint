@@ -1,5 +1,5 @@
 import { Zap, RefreshCw, TrendingUp, ChevronDown, Monitor, Layers, Building2, Megaphone, X, Check } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 type FormFields = {
   company: string;
@@ -27,6 +27,19 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [isHighlighted, setIsHighlighted] = useState(false);
+
+  const formRef = useRef<HTMLDivElement>(null);
+  const companyInputRef = useRef<HTMLInputElement>(null);
+
+  function handleScrollToContact() {
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+      companyInputRef.current?.focus({ preventScroll: true });
+      setIsHighlighted(true);
+      setTimeout(() => setIsHighlighted(false), 900);
+    }, 600);
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = e.target;
@@ -71,6 +84,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Noto Sans JP', sans-serif" }}>
+      <style>{`
+        @keyframes form-highlight {
+          0%   { border-color: #e5e7eb; background-color: #ffffff; }
+          40%  { border-color: #93c5fd; background-color: #eff6ff; }
+          100% { border-color: #e5e7eb; background-color: #ffffff; }
+        }
+        .form-highlight {
+          animation: form-highlight 0.8s ease-out forwards;
+        }
+      `}</style>
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-white">
         {/* Abstract flowing curve graphics - from lower-left to upper-right */}
@@ -142,7 +165,11 @@ export default function App() {
             </div>
 
             {/* Right side - Consultation panel */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 lg:p-10">
+            <div
+              id="contact"
+              ref={formRef}
+              className={`bg-white rounded-2xl border shadow-sm p-8 lg:p-10 ${isHighlighted ? 'form-highlight' : 'border-gray-200'}`}
+            >
               {isSubmitted ? (
                 /* サンクスメッセージ */
                 <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
@@ -177,6 +204,7 @@ export default function App() {
                         name="company"
                         type="text"
                         required
+                        ref={companyInputRef}
                         value={fields.company}
                         onChange={handleChange}
                         className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${errors.company ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
@@ -564,7 +592,12 @@ export default function App() {
           
           <p className="text-lg text-gray-600 leading-relaxed p-[0px] mx-[0px] mt-[-12px] mb-[29px]"><br />新規立ち上げ、検証用LP、改善前提のWebページ制作など、まずはお気軽ご相談ください。</p>
           
-          <button className="bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/30 text-lg px-[40px] py-[16px] mx-[0px] my-[4px]">初期LPの改善案を無料で受け取る</button>
+          <button
+            onClick={handleScrollToContact}
+            className="bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/30 text-lg px-[40px] py-[16px] mx-[0px] my-[4px]"
+          >
+            初期LPの改善案を無料で受け取る
+          </button>
         </div>
       </section>
 
